@@ -1,2 +1,2 @@
 # CSMD
-# For bayesian optimization
+For bayesian optimization
