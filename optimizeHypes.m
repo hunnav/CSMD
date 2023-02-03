@@ -1,4 +1,4 @@
-function [hyp,alpha,sigmasq,C_xx,invC] = optimizeHypes(theta, x_sample, y_sample, R, r, miniter, solvertype) % optimize hyperparameters based on MLE
+function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, miniter, solvertype) % optimize hyperparameters based on MLE
 
     if nargin < 4   % default solvertype
        solvertype = 'fmincon';
@@ -11,15 +11,11 @@ function [hyp,alpha,sigmasq,C_xx,invC] = optimizeHypes(theta, x_sample, y_sample
             error("dims of hyperparameter and sample input do not match");
         end
         
-        if miniter ~= 0
-            C_xx = [R r; r' 1];
-        else
-            Ath = diag(theta);  
-            Kxy = x_sample'*Ath*x_sample;
-            Kxx = repmat(diag(Kxy), 1, nSample);
-            corr = Kxx + Kxx' - 2*Kxy;
-            C_xx = exp(-corr);
-        end
+        Ath = diag(theta);  
+        Kxy = x_sample'*Ath*x_sample;
+        Kxx = repmat(diag(Kxy), 1, nSample);
+        corr = Kxx + Kxx' - 2*Kxy;
+        C_xx = exp(-corr);
 
         % Add the nugget term only when the eigenvalue of correlation matrix is too small to inverse the correlation matrix
         ew = eig(C_xx);
@@ -47,7 +43,7 @@ function [hyp,alpha,sigmasq,C_xx,invC] = optimizeHypes(theta, x_sample, y_sample
     switch (lower(solvertype))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
         case 'fmincon'
             options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
-            [hyp] = fmincon(f,theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*10,[],options); 
+            [hyp] = fmincon(f,theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*100,[],options); 
 
         case 'fminunc'
             options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
