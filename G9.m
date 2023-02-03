@@ -1,5 +1,3 @@
-oh
-
 clear;
 clc;
 delete(gcp('nocreate'))        % returns the current pool if one exists, otherwise pool will be empty & delete it
@@ -23,7 +21,7 @@ MLE_mode = 'fmincon';              % MLE_mode
 EI_mode = 'pso';                   % EI_mode
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
 ratio_or_weight = 0;               % Default ratio is 0.2 and Default weight is 0.5
-divider = 3;                       % How often to calculate hyperparameters
+divider = 1;                       % How often to calculate hyperparameters
 beta = 0.01;                       % beta must be between 0 to 1(all)
 
 Domain = (upper_Range - low_Range)*lhsdesign(size(initial_theta,2),num_initial_value)+low_Range;  % initial domain
