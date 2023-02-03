@@ -1,4 +1,4 @@
-function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, miniter, solvertype) % optimize hyperparameters based on MLE
+function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, solvertype) % optimize hyperparameters based on MLE
 
     if nargin < 4   % default solvertype
        solvertype = 'fmincon';
