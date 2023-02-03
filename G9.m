@@ -15,13 +15,14 @@ g4 = @(a,b,c,d,e,f,g) -4*a^2-b^2+3*a*b-2*c^2-5*f+11*g;
 max_iter = 1500;                   % Maximum iterations
 low_Range = -10;                   % x range min
 upper_Range = 10;                  % x range max 
-num_initial_value = 20;
+num_initial_value = 20;            % # of initial value
 initial_theta = [0,0,0,0,0,0,0];   % Initial theta (guess)
 MLE_mode = 'fmincon';              % MLE_mode
 EI_mode = 'pso';                   % EI_mode
 EI_acq_mode = 'weighted';          % EI_acq_mode
 ratio_or_weight = 0.5;             % Default ratio is 0.2 and Default weight is 0.5
-beta = 0.001;                      % beta must be between 0 to 1(all)
+divider = 3;                       % How often to calculate hyperparameters
+beta = 0.01;                       % beta must be between 0 to 1(all)
 
 Domain = (upper_Range - low_Range)*lhsdesign(size(initial_theta,2),num_initial_value)+low_Range;  % initial domain
 Domain_y = zeros(size(Domain,2),1);
@@ -43,7 +44,9 @@ while miniter < max_iter       % until to be maximum iterations
     min_obj = min(Domain_y);   % current minimum value
     
     % Hyperparameter optimization with new samples based on MLE (maximum likelyhood estimation)
-    [theta,alpha_kriging,sigma,R,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, R, r, miniter, MLE_mode);
+    if or(rem(miniter,divider)==0,miniter<100*size(Domain,1))
+        [theta,alpha_kriging,sigma,R,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, R, r, miniter, MLE_mode);
+    end
        
     % EI process to extract the new point(Dom_EI)
     ratio_or_weight_modify = ratio_or_weight;
