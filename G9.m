@@ -18,11 +18,11 @@ upper_Range = 10;                  % x range max
 num_initial_value = 20;            % # of initial value
 initial_theta = [0,0,0,0,0,0,0];   % Initial theta (guess)
 MLE_mode = 'fmincon';              % MLE_mode
-EI_mode = 'pso';                   % EI_mode
+EI_mode = 'ga';                    % EI_mode
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
 ratio_or_weight = 0;               % Default ratio is 0.2 and Default weight is 0.5
-divider = 3;                       % How often to calculate hyperparameters
-beta = 0.01;                       % beta must be between 0 to 1(all)
+divider = 1;                       % How often to calculate hyperparameters
+beta = 0.05;                       % beta must be between 0 to 1(all)
 
 Domain = (upper_Range - low_Range)*lhsdesign(size(initial_theta,2),num_initial_value)+low_Range;  % initial domain
 Domain_y = zeros(size(Domain,2),1);
@@ -31,9 +31,6 @@ for i = 1 : size(Domain,2)    % for all initial domain
     x(1:size(Domain,1)) = Domain(1:size(Domain,1),i);
     Domain_y(i,1) = ff(x(1),x(2),x(3),x(4),x(5),x(6),x(7));   % we need to change it according to the conditon, initial 'y' value when domain is given
 end
-
-R = zeros(size(Domain,2),size(Domain,2));
-r = 0;
 miniter = 0;     % number of iteration
 
 %% 1.2 Iteration for BayesOpt
@@ -45,15 +42,14 @@ while miniter < max_iter       % until to be maximum iterations
     
     % Hyperparameter optimization with new samples based on MLE (maximum likelyhood estimation)
     if or(rem(miniter,divider)==0,miniter<100*size(Domain,1))
-        [theta,alpha_kriging,sigma,R,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, R, r, miniter, MLE_mode);
+        [theta,alpha_kriging,sigma,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, miniter, MLE_mode);
     end
        
     % EI process to extract the new point(Dom_EI)
     ratio_or_weight_modify = ratio_or_weight;
     while 1
         Dom_EI = EIval_check(Domain, Domain_y, theta, sigma, alpha_kriging, inv_R, low_Range, upper_Range, min_obj, EI_mode, EI_acq_mode, ratio_or_weight_modify);
-        r=Correlation(Domain,Dom_EI,theta);
-        if min(abs(log(r./theta))) > beta
+        if min(abs(log(Correlation(Domain,Dom_EI,theta)./theta))) > beta
             break
         else
            if strcmp(EI_acq_mode,'normal')
@@ -65,27 +61,16 @@ while miniter < max_iter       % until to be maximum iterations
     end
 
     x = Dom_EI';
-    add = 0;
-    gg1 = g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    if gg1 < 0
-        add = add - gg1;
-    end
-    gg2 = g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    if gg2 < 0
-        add = add - gg2;
-    end
-    gg3 = g3(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    if gg3 < 0
-        add = add - gg3;
-    end
-    gg4 = g4(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    if gg4 < 0
-        add = add - gg4;
-    end
-
+    gg1 = g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
+    gg2 = g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
+    gg3 = g3(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
+    gg4 = g4(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
+    objective = ff(x(1),x(2),x(3),x(4),x(5),x(6),x(7));
+    p0 = 10^(floor(1+log10(abs(objective))));
     % Add sample from the EI process
     Domain = [Domain,x];                % add the new point x to domain
-    Domain_y = [Domain_y;ff(x(1),x(2),x(3),x(4),x(5),x(6),x(7))+add];         % % we need to change it according to the conditon, add the new caluclated y to domain
+    Domain_y = [Domain_y;objective+p0*max([gg1,gg2,gg3,gg4,0])];         % % we need to change it according to the conditon, add the new caluclated y to domain
+    
     miniter = miniter + 1    % add the number of iteration
     Current_Minimum_Value = min_obj
     toc
