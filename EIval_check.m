@@ -16,7 +16,7 @@ function bayesopt_x = EIval_check(initial_Dom,initial_Domy,theta,sigma,alpha,inv
         case 'fmincon'   % only difference is method to find mininum value
            EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
            options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central');
-           bayesopt_x = fmincon(EI_p,zeros(dim,1),[],[],[],[],low_Range,upper_Range,[],options);   % different part
+           bayesopt_x = fmincon(EI_p,zeros(dim,1),[],[],[],[],low_Range*ones(1,dim),upper_Range*ones(1,dim),[],options)';   % different part
           
         case 'ga+fmincon'  % only difference is method to find mininum value
            EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        

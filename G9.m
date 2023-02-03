@@ -18,11 +18,11 @@ upper_Range = 10;                  % x range max
 num_initial_value = 20;            % # of initial value
 initial_theta = [0,0,0,0,0,0,0];   % Initial theta (guess)
 MLE_mode = 'fmincon';              % MLE_mode
-EI_mode = 'ga';                    % EI_mode
+EI_mode = 'ga';                    % EI_mode ('ga','pso','fmincon','ga+fmincon','multi_start')
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
 ratio_or_weight = 0;               % Default ratio is 0.2 and Default weight is 0.5
 divider = 1;                       % How often to calculate hyperparameters
-beta = 0.05;                       % beta must be between 0 to 1(all)
+beta = 0.02;                       % beta must be between 0 to 1(all)
 
 Domain = (upper_Range - low_Range)*lhsdesign(size(initial_theta,2),num_initial_value)+low_Range;  % initial domain
 Domain_y = zeros(size(Domain,2),1);
