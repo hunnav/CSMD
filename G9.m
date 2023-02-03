@@ -42,7 +42,7 @@ while miniter < max_iter       % until to be maximum iterations
     
     % Hyperparameter optimization with new samples based on MLE (maximum likelyhood estimation)
     if or(rem(miniter,divider)==0,miniter<100*size(Domain,1))
-        [theta,alpha_kriging,sigma,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, miniter, MLE_mode);
+        [theta,alpha_kriging,sigma,inv_R] = optimizeHypes(initial_theta, Domain, Domain_y, MLE_mode);
     end
        
     % EI process to extract the new point(Dom_EI)
