@@ -1,36 +1,37 @@
-function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, solvertype) % optimize hyperparameters based on MLE
+function [hyp,alpha,sigmasq,C_xx,invC] = optimizeHypes(theta, x_sample, y_sample, R, r, miniter, solvertype) % optimize hyperparameters based on MLE
 
     if nargin < 4   % default solvertype
        solvertype = 'fmincon';
     end
 
-    function out_GA = subG_MLE(theta)
-        nSample = size(x_sample,2);  % number of x_sample
-        % make correlation matrix R with exponential kernel(KernelExponential)
-
-        nSample = size(x_sample,2);  % # of the Samples 
-        dim = size(x_sample,1);      % dim of inputs
+    function out_GA = subG_MLE(theta) % make correlation matrix R with exponential kernel(KernelExponential)
+        nSample = size(x_sample,2);   % # of the Samples 
+        dim = size(x_sample,1);       % dim of inputs
         if size(theta) ~= dim    
             error("dims of hyperparameter and sample input do not match");
         end
-
-        Ath = diag(theta);  
-        Kxy = x_sample'*Ath*x_sample;
-        Kxx = repmat(diag(Kxy), 1, nSample);
-        corr = Kxx + Kxx' - 2*Kxy;
-        C_xx = exp(-corr);  % correlation
+        
+        if miniter ~= 0
+            C_xx = [R r; r' 1];
+        else
+            Ath = diag(theta);  
+            Kxy = x_sample'*Ath*x_sample;
+            Kxx = repmat(diag(Kxy), 1, nSample);
+            corr = Kxx + Kxx' - 2*Kxy;
+            C_xx = exp(-corr);
+        end
 
         % Add the nugget term only when the eigenvalue of correlation matrix is too small to inverse the correlation matrix
         ew = eig(C_xx);
-        nugget = 1e-6*eye(size(C_xx,1));
+        nugget = 1e-4*eye(size(C_xx,1));
         for i = 1: length(ew) 
             if(abs(ew(i))<1e-10)
                 C_xx = C_xx + nugget;
             end
         end
         % C_xx is now reversible
-        R = chol(C_xx);
-        invC = R\(R'\eye(size(R,1)));
+        R_chol = chol(C_xx);
+        invC = R_chol\(R_chol'\eye(size(R_chol,1)));
         Xi = ones(nSample,1);
 
         alpha = (Xi'*invC*y_sample)/(Xi'*invC*Xi);

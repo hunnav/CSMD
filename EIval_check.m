@@ -1,42 +1,36 @@
-function bayesopt_x = EIval_check(EI_mode,initial_Dom,initial_Domy,theta,sigma,alpha,inv_R,low_Range,upper_Range,min_obj)
+function bayesopt_x = EIval_check(initial_Dom,initial_Domy,theta,sigma,alpha,inv_R,low_Range,upper_Range,min_obj,EI_mode,EI_acq_mode,ratio_or_weight)
     num_samp = size(initial_Dom,2); % number of the sample
     dim = size(initial_Dom,1);      % dimension of the sample
     
     switch EI_mode
         case 'ga'
-           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj);        
-           options = optimoptions('ga','InitialPopulationRange',[low_Range;upper_Range],'PopulationSize',150,'UseParallel',true); % what....????????
-           ga_x = ga(EI_p,dim,[],[],[],[],low_Range,upper_Range,[],options);                                % x point to make EI maximum
-           bayesopt_x = ga_x;                                      % maximum value of function EI
+           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
+           options = optimoptions('ga','InitialPopulationRange',[low_Range;upper_Range],'PopulationSize',150,'UseParallel',true);
+           bayesopt_x = ga(EI_p,dim,[],[],[],[],low_Range,upper_Range,[],options);       % x point to make EI maximum  
 
-        case 'optimoptions'
-           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj);
+        case 'pso'
+           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
            options = optimoptions('particleswarm','UseParallel',true,'SwarmSize',200);
-           particleswarm_x = particleswarm(EI_p,dim,low_Range*ones(dim,1),upper_Range*ones(dim,1),options);
-           bayesopt_x = particleswarm_x;     
-
+           bayesopt_x = particleswarm(EI_p,dim,low_Range*ones(dim,1),upper_Range*ones(dim,1),options);   
 
         case 'fmincon'   % only difference is method to find mininum value
-           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj);
+           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
            options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central');
-           fmin_x = fmincon(EI_p,zeros(dim,1),[],[],[],[],low_Range,upper_Range,[],options);   % different part
-           bayesopt_x = fmin_x;
+           bayesopt_x = fmincon(EI_p,zeros(dim,1),[],[],[],[],low_Range,upper_Range,[],options);   % different part
           
         case 'ga+fmincon'  % only difference is method to find mininum value
-           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj);
+           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
            hybridopts = optimoptions('fmincon','Display', 'off', 'algorithm', 'interior-point',...
                                      'HessianApproximation','bfgs','FiniteDifferenceType', 'central','OptimalityTolerance',1e-10);   % different part
            options = optimoptions('ga','InitialPopulationRange',[low_Range,upper_Range],'PopulationSize',500,'UseParallel',true,'HybridFcn',{'fmincon',hybridopts});
-           [hybrid_x,EI_p] = ga(EI_p,dim,[],[],[],[],low_Range,upper_Range,[],options);
-           bayesopt_x = hybrid_x;
+           bayesopt_x = ga(EI_p,dim,[],[],[],[],low_Range,upper_Range,[],options);
 
         case 'multi_start'   % only difference is method to find mininum value
-           EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj);
+           EI_p = @(x)-EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
            options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central');
            problem = createOptimProblem('fmincon','objective',EI_p,'x0',zeros(dim,1),'lb',low_Range,'ub',upper_Range,'options',options);
            ms = MultiStart('UseParallel',true);
-           [multi_x,EI_p] = run(ms,problem,500);
-           bayesopt_x = multi_x;
+           bayesopt_x = run(ms,problem,500);
     
 %         case 'random_sampling'    % only difference is method to find mininum value
 %             Need to be fixed

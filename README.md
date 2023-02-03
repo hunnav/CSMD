@@ -1,2 +1,0 @@
-# CSMD
-For bayesian optimization

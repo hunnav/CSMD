@@ -1,22 +1,7 @@
 function [mean_pred,sigma_pred] = GPR(x_sample,y_sample,new_x,theta,sigma,alpha,num_samp,inverse_R_R)
 
-    % Gaussian Process Regression
-    Ath = diag(theta);  % make diagonal matrix
-    if size(new_x,2) > size(new_x,1)   % if something wrong, make correct
-        new_x = new_x';
-    end
-    
-    Mxy = new_x'*Ath*new_x;
-    Mxx = diag(Mxy);
-    
-    Kxy = x_sample'*Ath*x_sample;
-    Kxx = diag(Kxy);
-    
-    Nxy = new_x'*Ath*x_sample;
-    
-    corr = Mxx + Kxx - 2*Nxy';
-    r_r = exp(-corr);          % make correlation matrix r (between unknown point x and known point)
-    
+    r_r = Correlation(x_sample,new_x,theta);
+
     % For ordinary kriging (if the value of 1 consist of function f(x), it is universal kriging)
     a = ones(num_samp,1);
     mean_pred = alpha + r_r'*inverse_R_R*(y_sample-alpha*a);
