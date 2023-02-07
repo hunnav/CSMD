@@ -5,8 +5,8 @@ function bayesopt_x = EIval_check(initial_Dom,initial_Domy,theta,sigma,alpha,inv
     switch EI_mode
         case 'ga'
            EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        
-           options = optimoptions('ga','InitialPopulationRange',[low_Range;upper_Range],'PopulationSize',150,'UseParallel',true);
-           bayesopt_x = ga(EI_p,dim,[],[],[],[],low_Range,upper_Range,[],options);       % x point to make EI maximum  
+           options = optimoptions('ga','InitialPopulationRange',[low_Range;upper_Range],'PopulationSize',200,'UseParallel',true);
+           bayesopt_x = ga(EI_p,dim,[],[],[],[],low_Range*ones(dim,1),upper_Range*ones(dim,1),[],options);       % x point to make EI maximum  
 
         case 'pso'
            EI_p = @(x) -EI_acq(initial_Dom,initial_Domy,x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight);        

@@ -1,30 +1,34 @@
-function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, solvertype) % optimize hyperparameters based on MLE
+function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(theta, x_sample, y_sample, R_before, r, miniter, solvertype) % optimize hyperparameters based on MLE
 
+    nSample = size(x_sample,2);   % # of the Samples 
+    dim = size(x_sample,1);       % dim of inputs    
     if nargin < 4   % default solvertype
        solvertype = 'fmincon';
     end
+    if size(theta) ~= dim
+        error("dims of hyperparameter and sample input do not match");
+    end
+    R = zeros(nSample,nSample,dim);
+    if miniter ==0
+        for i = 1:dim
+            Kxy = x_sample(i,:)'*x_sample(i,:);
+            Kxx = repmat(diag(Kxy), 1, nSample);
+            R(:,:,i) = Kxx + Kxx' - 2*Kxy;
+        end
+    else
+        for j = 1:dim
+            R(:,:,j) = [R_before(:,:,j) r(:,:,j); r(:,:,j)' 0];
+        end
+    end
 
     function out_GA = subG_MLE(theta) % make correlation matrix R with exponential kernel(KernelExponential)
-        nSample = size(x_sample,2);   % # of the Samples 
-        dim = size(x_sample,1);       % dim of inputs
-        if size(theta) ~= dim    
-            error("dims of hyperparameter and sample input do not match");
-        end
+        C_xx = exp(-sum(bsxfun(@times, R, permute(theta, [3,1,2])), 3));
         
-        Ath = diag(theta);  
-        Kxy = x_sample'*Ath*x_sample;
-        Kxx = repmat(diag(Kxy), 1, nSample);
-        corr = Kxx + Kxx' - 2*Kxy;
-        C_xx = exp(-corr);
-
         % Add the nugget term only when the eigenvalue of correlation matrix is too small to inverse the correlation matrix
         ew = eig(C_xx);
-        nugget = 1e-4*eye(size(C_xx,1));
-        for i = 1: length(ew) 
-            if(abs(ew(i))<1e-10)
-                C_xx = C_xx + nugget;
-            end
-        end
+        nugget = 1e-6*eye(size(C_xx,1));       
+        C_xx = C_xx + nugget * sum(abs(ew)<1e-10);
+
         % C_xx is now reversible
         R_chol = chol(C_xx);
         invC = R_chol\(R_chol'\eye(size(R_chol,1)));
@@ -43,7 +47,7 @@ function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, sol
     switch (lower(solvertype))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
         case 'fmincon'
             options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
-            [hyp] = fmincon(f,theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*100,[],options); 
+            [hyp] = fmincon(f,theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*10,[],options); 
 
         case 'fminunc'
             options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
@@ -58,6 +62,6 @@ function [hyp,alpha,sigmasq,invC] = optimizeHypes(theta, x_sample, y_sample, sol
             [hyp] = particleswarm(f,length(theta),0,10,options);
                   
         otherwise
-            error("solver type is not specifie");
+            error("solver type is not specific");
     end
 end

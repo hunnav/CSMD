@@ -1,19 +1,19 @@
-function r_r = Correlation(x_sample,new_x,theta)
-
+function r_r = Correlation(x_sample,new_x)
+    nSample = size(x_sample,2);   % # of the Samples 
+    dim = size(x_sample,1);       % dim of inputs    
     % Gaussian Process Regression
-    Ath = diag(theta);  % make diagonal matrix
-    if size(new_x,2) > size(new_x,1)   % if something wrong, make correct
-        new_x = new_x';
+    r_r = zeros(nSample,1,dim);
+    new_x = new_x';
+
+    for i = 1:dim
+        Mxx = new_x(i)^2;
+        
+        Kxy = x_sample(i,:)'*x_sample(i,:);
+        Kxx = diag(Kxy);
+        
+        Nxy = new_x(i)'*x_sample(i,:);
+        
+        r_r(:,:,i) = Mxx + Kxx - 2*Nxy';
     end
-    
-    Mxy = new_x'*Ath*new_x;
-    Mxx = diag(Mxy);
-    
-    Kxy = x_sample'*Ath*x_sample;
-    Kxx = diag(Kxy);
-    
-    Nxy = new_x'*Ath*x_sample;
-    
-    corr = Mxx + Kxx - 2*Nxy';
-    r_r = exp(-corr);          % make correlation matrix r (between unknown point x and known point)
+
 end
