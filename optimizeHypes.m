@@ -1,8 +1,9 @@
-function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(theta, x_sample, y_sample, R_before, r, miniter, solvertype) % optimize hyperparameters based on MLE
+function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(Initial_theta, theta, x_sample, y_sample, R_before, r, miniter, divider, solvertype) % optimize hyperparameters based on MLE
 
     nSample = size(x_sample,2);   % # of the Samples 
-    dim = size(x_sample,1);       % dim of inputs    
-    if size(theta) ~= dim
+    dim = size(x_sample,1);       % dim of inputs  
+    hyp = theta;
+    if size(Initial_theta) ~= dim
         error("dims of hyperparameter and sample input do not match");
     end
     
@@ -18,27 +19,29 @@ function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(theta, x_sample, y_sample, R
             R(:,:,j) = [R_before(:,:,j) r(:,:,j); r(:,:,j)' 0];
         end
     end
-
+    
     % 2. SOLVER SELECTIONS (NOT DETERMINED YET)
-    switch (lower(solvertype))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
-        case 'fmincon'
-            options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
-            [hyp] = fmincon(@(x) -subG_MLE(x),theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*10,[],options); 
+    if or(rem(miniter,divider)==0,miniter<100*dim)
+        switch (lower(solvertype))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
+            case 'fmincon'
+                options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
+                [hyp] = fmincon(@(x) -subG_MLE(x),Initial_theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*10,[],options);
 
-        case 'fminunc'
-            options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
-            [hyp] = fminunc(@(x) -subG_MLE(x),theta,options);
-        
-        case 'ga'
-            options = optimoptions('ga','PopulationSize',300,'UseParallel',true);
-            [hyp] = ga(@(x) -subG_MLE(x), length(theta),[],[],[],[],0,1e5,[],[],options);
+            case 'fminunc'
+                options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
+                [hyp] = fminunc(@(x) -subG_MLE(x),Initial_theta,options);
 
-        case 'particleswarm'
-            options = optimoptions('particleswarm','UseParallel',true,'SwarmSize',200);
-            [hyp] = particleswarm(@(x) -subG_MLE(x),length(theta),0,10,options);
-                  
-        otherwise
-            error("solver type is not specific");
+            case 'ga'
+                options = optimoptions('ga','PopulationSize',300,'UseParallel',true);
+                [hyp] = ga(@(x) -subG_MLE(x), length(Initial_theta),[],[],[],[],0,10,[],[],options);
+
+            case 'particleswarm'
+                options = optimoptions('particleswarm','UseParallel',true,'SwarmSize',200);
+                [hyp] = particleswarm(@(x) -subG_MLE(x),length(Initial_theta),0,10,options);
+
+            otherwise
+                error("solver type is not specific");
+        end
     end
 
     function out_GA = subG_MLE(theta) % make correlation matrix R with exponential kernel(KernelExponential)
