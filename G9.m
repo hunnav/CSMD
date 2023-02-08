@@ -3,7 +3,7 @@ clc;
 delete(gcp('nocreate'))        % returns the current pool if one exists, otherwise pool will be empty & delete it
 parpool('threads')             % creates and returns a thread-based pool.
 
-%% 1.1 Setting for BayesOpt
+%% 1.Setting for BayesOpt
 
 ff= @(a,b,c,d,e,f,g) (a-10).^2+5*(b-12).^2+c.^4+3*(d-11).^2+10*e.^6+7*f.^2+g.^4-4*f.*g-10*f-8*g; % function
 
@@ -32,7 +32,7 @@ theta = zeros(1,dim);
 Domain = (upper_Range - low_Range)*lhsdesign(dim,num_initial_value)+low_Range;  % initial domain
 Domain_y = transpose(ff(Domain(1,:), Domain(2,:), Domain(3,:), Domain(4,:), Domain(5,:), Domain(6,:), Domain(7,:)));
 
-%% 1.2 Iteration for BayesOpt
+%% 2.Iteration for BayesOpt
 
 % Infilling criterion : EI process
 while miniter < max_iter       % until to be maximum iterations
@@ -75,6 +75,7 @@ while miniter < max_iter       % until to be maximum iterations
     toc
 end
 
+%% 3.Result
 Minimum_Value = min(Domain_y);
 row = find(Domain_y==Minimum_Value);
 Minimum_Value_x = Domain(:,row)'
