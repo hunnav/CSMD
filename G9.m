@@ -21,9 +21,9 @@ MLE_mode = 'fmincon';              % MLE_mode
 EI_mode = 'ga';                    % EI_mode ('ga','pso','fmincon','ga+fmincon','multi_start')
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
 ratio_or_weight = 0;               % Default ratio is 0 and Default weight is 0.5
-divider = 2;                       % How often to calculate hyperparameters
+divider = 1;                       % How often to calculate hyperparameters
 beta = 0.001;                      % beta must be between 0 to 1(all)
-
+    
 dim = size(initial_theta,2);
 Domain = (upper_Range - low_Range)*lhsdesign(dim,num_initial_value)+low_Range;  % initial domain
 x = zeros(dim,1);
@@ -41,12 +41,12 @@ r = zeros(num_initial_value,1,dim);
 while miniter < max_iter       % until to be maximum iterations
     tic
     min_obj = min(Domain_y);   % current minimum value
-    
+
     % Hyperparameter optimization with new samples based on MLE (maximum likelyhood estimation)
     if or(rem(miniter,divider)==0,miniter<100*size(Domain,1))
         [theta,alpha_kriging,sigma,inv_R,R] = optimizeHypes(initial_theta, Domain, Domain_y, R, r, miniter, MLE_mode);
     end
-       
+    
     % EI process to extract the new point(Dom_EI)
     ratio_or_weight_modify = ratio_or_weight;
     while 1
@@ -62,7 +62,6 @@ while miniter < max_iter       % until to be maximum iterations
            end
         end
     end
-
     x = Dom_EI';
     gg1 = g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
     gg2 = g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon

@@ -7,13 +7,10 @@ function r_r = Correlation(x_sample,new_x)
 
     for i = 1:dim
         Mxx = new_x(i)^2;
-        
-        Kxy = x_sample(i,:)'*x_sample(i,:);
-        Kxx = diag(Kxy);
-        
+        Kxx = (x_sample(i,:).^ 2);
         Nxy = new_x(i)'*x_sample(i,:);
         
-        r_r(:,:,i) = Mxx + Kxx - 2*Nxy';
+        r_r(:,:,i) = Mxx + Kxx' - 2*Nxy';
     end
 
 end

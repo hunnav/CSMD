@@ -1,6 +1,22 @@
 function EI_p = EI_acq(initial_Dom,initial_Domy,new_x,theta,sigma,alpha,num_samp,inv_R,min_obj,EI_acq_mode,ratio_or_weight)  
     % EI evaulation
-    r_r = exp(-sum(bsxfun(@times, Correlation(initial_Dom,new_x), permute(theta, [3,1,2])), 3));
+
+    % correlation r (for speed)
+    nSample = size(initial_Dom,2);   % # of the Samples 
+    dim = size(initial_Dom,1);       % dim of inputs    
+    % Gaussian Process Regression
+    r = zeros(nSample,1,dim);
+    new_x = new_x';
+
+    for i = 1:dim
+        Mxx = new_x(i)^2;
+        Kxx = (initial_Dom(i,:).^ 2);
+        Nxy = new_x(i)'*initial_Dom(i,:);
+        
+        r(:,:,i) = Mxx + Kxx' - 2*Nxy';
+    end
+
+    r_r = exp(-sum(bsxfun(@times, r, permute(theta, [3,1,2])), 3));
 
     % For ordinary kriging (if the value of 1 consist of function f(x), it is universal kriging)
     a = ones(num_samp,1);
