@@ -18,23 +18,19 @@ upper_Range = 10;                  % x range max
 num_initial_value = 20;            % # of initial value
 Initial_theta = [0,0,0,0,0,0,0];   % Initial theta (guess)
 MLE_mode = 'fmincon';              % MLE_mode
-EI_mode = 'pso';                    % EI_mode ('ga','pso','fmincon','ga+fmincon','multi_start')
+EI_mode = 'ga';                    % EI_mode ('ga','pso','fmincon','ga+fmincon','multi_start')
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
+divider = 2;                       % How often to calculate hyperparameters
 ratio_or_weight = 0;               % Default ratio is 0 and Default weight is 0.5
-divider = 1;                       % How often to calculate hyperparameters
 beta = 0.001;                      % beta must be between 0 to 1(all)
     
-dim = size(Initial_theta,2);
-Domain = (upper_Range - low_Range)*lhsdesign(dim,num_initial_value)+low_Range;  % initial domain
-x = zeros(dim,1);
-
-Domain_y = ff(Domain(1,:), Domain(2,:), Domain(3,:), Domain(4,:), Domain(5,:), Domain(6,:), Domain(7,:));
-Domain_y = Domain_y';
-theta = zeros(1,dim);
-
 miniter = 0;     % number of iteration
+dim = size(Initial_theta,2);
 R = zeros(num_initial_value,num_initial_value,dim);
 r = zeros(num_initial_value,1,dim);
+theta = zeros(1,dim);
+Domain = (upper_Range - low_Range)*lhsdesign(dim,num_initial_value)+low_Range;  % initial domain
+Domain_y = transpose(ff(Domain(1,:), Domain(2,:), Domain(3,:), Domain(4,:), Domain(5,:), Domain(6,:), Domain(7,:)));
 
 %% 1.2 Iteration for BayesOpt
 
@@ -55,9 +51,9 @@ while miniter < max_iter       % until to be maximum iterations
             break
         else
            if strcmp(EI_acq_mode,'normal')
-               ratio_or_weight_modify = ratio_or_weight_modify+1.0;
+               ratio_or_weight_modify = ratio_or_weight_modify+0.5;
            else
-               ratio_or_weight_modify = ratio_or_weight_modify-1.0;
+               ratio_or_weight_modify = ratio_or_weight_modify-0.5;
            end
         end
     end

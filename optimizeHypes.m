@@ -2,13 +2,12 @@ function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(Initial_theta, theta, x_samp
 
     nSample = size(x_sample,2);   % # of the Samples 
     dim = size(x_sample,1);       % dim of inputs  
-    hyp = theta;
     if size(Initial_theta) ~= dim
         error("dims of hyperparameter and sample input do not match");
     end
     
     R = zeros(nSample,nSample,dim);
-    if miniter ==0
+    if miniter == 0
         for i = 1:dim
             Kxy = x_sample(i,:)'*x_sample(i,:);
             Kxx = repmat(diag(Kxy), 1, nSample);
@@ -25,7 +24,7 @@ function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(Initial_theta, theta, x_samp
         switch (lower(solvertype))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
             case 'fmincon'
                 options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
-                [hyp] = fmincon(@(x) -subG_MLE(x),Initial_theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*10,[],options);
+                [hyp] = fmincon(@(x) -subG_MLE(x),Initial_theta,[],[],[],[],ones(size(x_sample,1),1)*0,ones(size(x_sample,1),1)*100,[],options);
 
             case 'fminunc'
                 options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
@@ -42,6 +41,9 @@ function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(Initial_theta, theta, x_samp
             otherwise
                 error("solver type is not specific");
         end
+    else
+        hyp = theta;
+        subG_MLE(theta);
     end
 
     function out_GA = subG_MLE(theta) % make correlation matrix R with exponential kernel(KernelExponential)
