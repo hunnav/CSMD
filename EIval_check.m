@@ -56,5 +56,3 @@ function bayesopt_x = EIval_check(initial_Dom,initial_Domy,theta,sigma,alpha,inv
 %             EIval_entire = EI_p;
 %             krig_devia(krig_devia<1e-6) = 0;
      end
-
-end

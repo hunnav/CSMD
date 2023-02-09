@@ -12,5 +12,3 @@ function r_r = Correlation(x_sample,new_x)
         
         r_r(:,:,i) = Mxx + Kxx' - 2*Nxy';
     end
-
-end
