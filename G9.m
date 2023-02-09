@@ -1,5 +1,6 @@
 clear;
 clc;
+rng("shuffle")
 delete(gcp('nocreate'))        % returns the current pool if one exists, otherwise pool will be empty & delete it
 parpool('threads')             % creates and returns a thread-based pool.
 
@@ -22,7 +23,7 @@ EI_mode = 'ga';                    % EI_mode ('ga','pso','fmincon','ga+fmincon',
 EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
 divider = 2;                       % How often to calculate hyperparameters
 ratio_or_weight = 0;               % Default ratio is 0 and Default weight is 0.5
-beta = 0.001;                      % beta must be between 0 to 1(all)
+beta = 0.05;                       % beta must be between 0 to 1(all)
     
 miniter = 0;     % number of iteration
 dim = size(Initial_theta,2);
@@ -58,10 +59,10 @@ while miniter < max_iter       % until to be maximum iterations
         end
     end
     x = Dom_EI';
-    gg1 = g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
-    gg2 = g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
-    gg3 = g3(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
-    gg4 = g4(x(1),x(2),x(3),x(4),x(5),x(6),x(7))-0;    % we need to change it according to the conditon
+    gg1 = 0-g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
+    gg2 = 0-g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
+    gg3 = 0-g3(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
+    gg4 = 0-g4(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
     objective = ff(x(1),x(2),x(3),x(4),x(5),x(6),x(7));
     p0 = 10^(floor(1+log10(abs(objective))));
     

@@ -52,7 +52,9 @@ function [hyp,alpha,sigmasq,invC,R] = optimizeHypes(Initial_theta, theta, x_samp
         % Add the nugget term only when the eigenvalue of correlation matrix is too small to inverse the correlation matrix
         ew = eig(C_xx);
         nugget = 1e-6*eye(size(C_xx,1));       
-        C_xx = C_xx + nugget * sum(abs(ew)<1e-10);
+        if sum(abs(ew)<1e-10)>= 1
+            C_xx = C_xx + nugget;
+        end
 
         % C_xx is now reversible
         R_chol = chol(C_xx);
