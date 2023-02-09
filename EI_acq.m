@@ -61,4 +61,3 @@ function EI_p = EI_acq(initial_Dom,initial_Domy,new_x,theta,sigma,alpha,num_samp
         otherwise
             error('Please select one')
     end
-end
