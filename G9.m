@@ -6,33 +6,9 @@ delete(gcp('nocreate'))        % returns the current pool if one exists, otherwi
 parpool('threads')             % creates and returns a thread-based pool.
 
 %% 1.Setting for BayesOpt
-f = @(a,b,c,d,e,f,g) (a-10).^2+5*(b-12).^2+c.^4+3*(d-11).^2+10*e.^6+7*f.^2+g.^4-4*f.*g-10*f-8*g;   % function
 
-g1 = @(a,b,c,d,e,f,g) 127-2*a^2-3*b^4-c-4*d^2-5*e;
-g2 = @(a,b,c,d,e,f,g) 282-7*a-3*b-10*c^2-d+e;
-g3 = @(a,b,c,d,e,f,g) 196-23*a-b^2-6*f^2+8*g;
-g4 = @(a,b,c,d,e,f,g) -4*a^2-b^2+3*a*b-2*c^2-5*f+11*g;
+[S] = input_struc;
 
-max_iter = 1500;                   % Maximum iterations
-low_Range = -10;                   % x range min
-upper_Range = 10;                  % x range max 
-num_initial_value = 10;            % # of initial value
-Initial_theta = [0,0,0,0,0,0,0];   % Initial theta (guess)
-MLE_mode = 'fmincon';              % MLE_mode
-EI_mode = 'ga+fmincon';            % EI_mode ('ga','pso','fmincon','ga+fmincon','multi_start')
-EI_acq_mode = 'normal';            % EI_acq_mode('normal','weighted')
-divider = 2;                       % How often to calculate hyperparameters
-ratio_or_weight = 0;               % Default ratio is 0 and Default weight is 0.5
-beta = 0.01;                       % Criterion of nearest point
-K = 100;                           % Scale of Modified Domain
-    
-Iteration = 0;                     % number of iteration           
-dim = size(Initial_theta,2);
-theta = zeros(1,dim);
-R = zeros(num_initial_value,num_initial_value,dim);
-r = zeros(num_initial_value,1,dim);
-Domain = (upper_Range - low_Range)*lhsdesign(dim,num_initial_value)+low_Range;  % initial domain
-Objective = transpose(f(Domain(1,:), Domain(2,:), Domain(3,:), Domain(4,:), Domain(5,:), Domain(6,:), Domain(7,:)));
 Constraint = zeros(num_initial_value,1);
 Add = zeros(num_initial_value,1);
 Standard = zeros(max_iter,6);
