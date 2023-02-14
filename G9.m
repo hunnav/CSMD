@@ -7,7 +7,7 @@ parpool('threads')             % creates and returns a thread-based pool.
 
 %% 1.Setting for BayesOpt
 
-[S] = input_struc;
+[S] = Input_struc;
 
 Constraint = zeros(max_iter,1);
 Add = zeros(num_initial_value,1);
@@ -36,13 +36,13 @@ while Iteration < max_iter       % until to be maximum iterations
     while 1
         while 1
             try
-                Dom_EI = EIval_check(Domain, Domain_y, theta, sigma, alpha_kriging, inv_R, low_Range, upper_Range, min_obj, EI_mode, EI_acq_mode, ratio_or_weight_modify);
+                new_x = EIval_check(Domain, Domain_y, theta, sigma, alpha_kriging, inv_R, low_Range, upper_Range, min_obj, EI_mode, EI_acq_mode, ratio_or_weight_modify);
                 break
             catch
                 disp('There is some error, repeat again.')
             end
         end
-        r = Correlation(Domain,Dom_EI);
+        r = Correlation(Domain,new_x);
         if min(sum(r, 3)) > beta
             break
         else
@@ -57,39 +57,19 @@ while Iteration < max_iter       % until to be maximum iterations
             end
         end
     end
-    x = Dom_EI';
-    gg1 = 0-g1(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    gg2 = 0-g2(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    gg3 = 0-g3(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    gg4 = 0-g4(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
-    
-    % Add sample from the EI process
-    n = size(Domain,2)+1;
-    Domain(:,n) = x; 
-    Objective(n,1) = f(x(1),x(2),x(3),x(4),x(5),x(6),x(7));
-    Constraint(n,1) = max([gg1,gg2,gg3,gg4,0]);
     
     Iteration = Iteration + 1    % add the number of iteration
-    Standard(Iteration,1) = Iteration;
-    if Objective(n,1)+A < 1
-        A = -Objective(n,1)+1;    
-    end
-    Standard(Iteration,2) = median(Objective+A);
-    B = exp(log(Standard(Iteration,2))/K);
-    Reverse_Modified_Objective = K - log(Objective+A)/log(B);
-    Reverse_Modified_Objective(Reverse_Modified_Objective < 0) = 0;
-    Modified_Objective = K-log(Reverse_Modified_Objective+1)/log(D);
-    non_zero_numbers = Constraint(Constraint ~= 0);
-    if isempty(non_zero_numbers)
-        Standard(Iteration,3) = 0;
-        C = 5;
-    else
-        Standard(Iteration,3) = median(non_zero_numbers);
-        C = exp(log(Standard(Iteration,3))/(K/2));
-        Add = log(Constraint+C)/log(C)-1;
-    end
-    Domain_y = Modified_Objective + Add;
-    Standard(Iteration,4:7) = [A,B,C,D];
+    n = size(Domain,2)+1;
+    Domain(:,n) = new_x; 
+    Objective(n,1) = f(new_x(1),new_x(2),new_x(3),new_x(4),new_x(5),new_x(6),new_x(7));    % we need to change it according to the conditon
+
+    gg1 = 0-g1(new_x(1),new_x(2),new_x(3),new_x(4),new_x(5),new_x(6),new_x(7));            % we need to change it according to the conditon
+    gg2 = 0-g2(new_x(1),new_x(2),new_x(3),new_x(4),new_x(5),new_x(6),new_x(7));            % we need to change it according to the conditon
+    gg3 = 0-g3(new_x(1),new_x(2),new_x(3),new_x(4),new_x(5),new_x(6),new_x(7));            % we need to change it according to the conditon
+    gg4 = 0-g4(new_x(1),new_x(2),new_x(3),new_x(4),new_x(5),new_x(6),new_x(7));            % we need to change it according to the conditon
+    Constraint(n,1) = max([gg1,gg2,gg3,gg4,0]);
+    
+    [Standard,Domain_y,Modified_Objective,Add] = Scaling(Standard,Iteration,Objective,Constraint,K);
 
     if (Add(end) == 0 && Objective(end) < Minimum_Value(end,2))
         Minimum_Value(end+1,:) = [Iteration, Objective(end)];
