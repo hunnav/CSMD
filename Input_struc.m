@@ -1,4 +1,4 @@
-function [S] = input_struc
+function [S] = Input_struc
 % S.problem
 % S.Hypopt
 % S.Kriging
