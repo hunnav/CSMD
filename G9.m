@@ -33,7 +33,7 @@ while Iteration < max_iter       % until to be maximum iterations
         min_obj = Domain_y(num_initial_value + Minimum_Value(end,1));
     end
     ratio_or_weight_modify = ratio_or_weight;
-    while 1
+    while 1         %%% While문 안으로 전부 안으로 넣기 (Correlation file 없애기)
         while 1
             try
                 new_x = EIval_check(Domain, Domain_y, theta, sigma, alpha_kriging, inv_R, low_Range, upper_Range, min_obj, EI_mode, EI_acq_mode, ratio_or_weight_modify);

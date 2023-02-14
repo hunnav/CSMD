@@ -1,4 +1,4 @@
-function [Standard,Domain_y,Modified_Objective,Add] = Scaling(Standard,Iteration,Objective,Constraint,K)
+function [Standard,Domain_y,Modified_Objective,Add] = Scaling(Standard,Iteration,Objective,Constraint,K)  %% 맨처음에 A새 D 기본값 저장해서 불러오는 방식으로 변경 
 
     Standard(Iteration,1) = Iteration;
     if Objective(n,1)+A < 1
