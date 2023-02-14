@@ -9,7 +9,7 @@ parpool('threads')             % creates and returns a thread-based pool.
 
 [S] = input_struc;
 
-Constraint = zeros(num_initial_value,1);
+Constraint = zeros(max_iter,1);
 Add = zeros(num_initial_value,1);
 Standard = zeros(max_iter,6);
 A = -min(Objective)+1; 
