@@ -9,7 +9,7 @@ end
 while 1
     %         while 1
     %             try
-    S = transpose(Acq_solver(S));
+    S = Acq_solver(S);
     %                 break
     %             catch
     %                 disp('There is some error, repeat again.')

@@ -1,6 +1,17 @@
-function Result = Acqfn(S)
+function Result = Acqfn(x,S)
 
-r_r = exp(-sum(bsxfun(@times, Correlation(S), permute(S.Hypopt.theta, [3,1,2])), 3));
+S.Hypopt.r = zeros(size(S.add.domain,2),1,S.prob.dim);
+x = x';
+
+for i = 1:S.prob.dim
+    Mxx = x(i)^2;
+    Kxx = (S.add.domain(i,:).^ 2);
+    Nxy = x(i)'*S.add.domain(i,:);
+
+    S.Hypopt.r(:,:,i) = Mxx + Kxx' - 2*Nxy';
+end
+
+r_r = exp(-sum(bsxfun(@times, S.Hypopt.r, permute(S.Hypopt.theta, [3,1,2])), 3));
 
 % For ordinary kriging (if the value of 1 consist of function f(x), it is universal kriging)
 a = ones(size(S.add.domain,2),1);
@@ -11,7 +22,7 @@ switch S.acqui.mode
     case "PI"
         % PI evaulation
         mu = r_r'*S.Hypopt.invR*a - 1;
-        pred_sig = sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
+        pred_sig = S.Hypopt.sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
 
         % % For simple kriging (remove the last part of the Ordinary kriging)
         % % It can be used only when the mean function is a known deterministic function
@@ -35,14 +46,14 @@ switch S.acqui.mode
     case "EI"
         % EI evaulation
         mu = r_r'*S.Hypopt.invR*a - 1;
-        pred_sig = sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
+        pred_sig = S.Hypopt.sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
         u = (S.acqui.minobj - pred_mean);
         ss = sqrt(pred_sig);
 
         p0 = 10^(floor(1+log10(abs(u))));
 
         if ss > 0
-            Result =  ((u-p0*ratio)*normcdf(u/ss) + ss*normpdf(u/ss));   % EI calculation process
+            Result =  ((u-p0*S.acqui.exploratio)*normcdf(u/ss) + ss*normpdf(u/ss));   % EI calculation process
         else
             Result = 0;
         end
@@ -59,7 +70,7 @@ switch S.acqui.mode
         vio_ind = find(find(const_group < 0)>0); % Find which constraints are violated with the design variable
 
         if ismepty(vio_ind) ~= 1
-            pred_mean = pred_mean + sum(abs([g1,g2,g3,g4]).*vio_ind);
+%             pred_mean = pred_mean + sum(abs([g1,g2,g3,g4]).*vio_ind);
         else
         end
         % 현재 constraints 가 위반 할 시, constraint ( g1,g2,g3,g4) 의 값이 음수값을 갖도록 통일하면
