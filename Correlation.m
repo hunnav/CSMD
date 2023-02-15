@@ -1,16 +1,15 @@
-function r = Correlation(Domain,x)
-    nSample = size(Domain,2);   % # of the Samples 
-    dim = size(Domain,1);       % dim of inputs    
-    % Gaussian Process Regression
-    r = zeros(nSample,1,dim);
-    x = x';
+function S = Correlation(S)
 
-    for i = 1:dim
-        Mxx = x(i)^2;
-        Kxx = (Domain(i,:).^ 2);
-        Nxy = x(i)'*Domain(i,:);
-        
-        r(:,:,i) = Mxx + Kxx' - 2*Nxy';
-    end
+% Gaussian Process Regression
+S.Hypopt.r = zeros(size(S.add.domain,2),1,S.prob.dim);
+S.acqui.x = S.acqui.x';
+
+for i = 1:S.prob.dim
+    Mxx = S.acqui.x(i)^2;
+    Kxx = (S.add.domain(i,:).^ 2);
+    Nxy = S.acqui.x(i)'*S.add.domain(i,:);
+
+    S.Hypopt.r(:,:,i) = Mxx + Kxx' - 2*Nxy';
+end
 
 end
