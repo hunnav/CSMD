@@ -20,13 +20,13 @@ while Iteration < max_iter       % until to be maximum iterations
     % EI process to extract the new point(Dom_EI)
     [x,r] = EIval_check(Domain, Domain_y, theta, sigma, alpha_kriging, inv_R, low_Range, upper_Range, ratio, beta, num_initial_value, Minimum_Value, EI_mode);
 
-    % Add a new point
+    % Scaling and add a new point
     Minimum_Value = Add_new_point(num_initial_value, Iteration, Domain, Objective, f, g1, g2, g3, g4, )
 
     % Print
-    Iteration = Iteration + 1
+    Iteration
     Minimum_Value(end,1:2)
-
+    
     toc
 end
 

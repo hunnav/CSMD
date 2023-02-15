@@ -1,6 +1,7 @@
-function Minimum_Value = Add_new_point(num_initial_value, Iteration, Domain, Objective, Constraint, Standard, K, f, g1, g2, g3, g4, )
+function Minimum_Value = Add_new_point(num_initial_value, Iteration, Domain, Objective, Constraint, Standard, K, f, g1, g2, g3, g4)
 
-    n = num_initial_value + Iteration + 1;
+    Iteration = Iteration + 1;
+    n = num_initial_value + Iteration;
     Domain(:,n) = x; 
     Objective(n,1) = f(x(1),x(2),x(3),x(4),x(5),x(6),x(7));    % we need to change it according to the conditon
 
@@ -13,7 +14,7 @@ function Minimum_Value = Add_new_point(num_initial_value, Iteration, Domain, Obj
     [Standard,Domain_y,Modified_Objective,Add] = Scaling(Standard,Iteration,Objective,Constraint,K);
 
     if (Add(end) == 0 && Objective(end) < Minimum_Value(end,2))
-        Minimum_Value(end+1,:) = [Iteration+1, Objective(end)];
+        Minimum_Value(end+1,:) = [Iteration, Objective(end)];
     end
 
 end
