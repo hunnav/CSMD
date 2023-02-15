@@ -21,19 +21,19 @@ function S = OptimizeHypes(S) % optimize hyperparameters based on MLE
         switch (lower(S.Hypopt.solver))  % all solvertypes are to find minimum of constrained nonlinear multivariable function
             case 'fmincon'
                 options = optimoptions(@fmincon,'Display', 'off', 'algorithm', 'interior-point','HessianApproximation','bfgs','FiniteDifferenceType', 'central','UseParallel',true);
-                [S.Hypopt.theta] = fmincon(@(x) -MLE(x), S.Hypopt.initheta,[],[],[],[],ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,[],options);
+                S.Hypopt.theta = fmincon(@(x) -MLE(x), S.Hypopt.initheta,[],[],[],[],ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,[],options);
 
             case 'fminunc'
                 options = optimoptions(@fminunc,'Display','off','algorithm','quasi-newton');
-                [S.Hypopt.theta] = fminunc(@(x) -MLE(x),S.Hypopt.initheta,options);
+                S.Hypopt.theta = fminunc(@(x) -MLE(x),S.Hypopt.initheta,options);
 
             case 'ga'
                 options = optimoptions('ga','PopulationSize',300,'UseParallel',true);
-                [S.Hypopt.theta] = ga(@(x) -MLE(x), length(S.Hypopt.initheta),[],[],[],[],ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,[],[],options);
+                S.Hypopt.theta = ga(@(x) -MLE(x), length(S.Hypopt.initheta),[],[],[],[],ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,[],[],options);
 
             case 'particleswarm'
                 options = optimoptions('particleswarm','UseParallel',true,'SwarmSize',200);
-                [S.Hypopt.theta] = particleswarm(@(x) -MLE(x),length(S.Hypopt.initheta),ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,options);
+                S.Hypopt.theta = particleswarm(@(x) -MLE(x),length(S.Hypopt.initheta),ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,options);
 
             otherwise
                 error("solver type is not specific");
