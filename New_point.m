@@ -7,14 +7,14 @@ else
 end
 
 while 1
-    %         while 1
-    %             try
-    S = Acq_solver(S);
-    %                 break
-    %             catch
-    %                 disp('There is some error, repeat again.')
-    %             end
-    %         end
+    while 1
+        try
+            S = Acq_solver(S);
+            break
+        catch
+            disp('There is some error, repeat again.')
+        end
+    end
     S = Correlation(S);
     if min(sum(S.Hypopt.r, 3)) > S.acqui.mindis
         break
