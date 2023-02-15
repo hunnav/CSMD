@@ -1,4 +1,4 @@
-function [S] = OptimizeHypes(S) % optimize hyperparameters based on MLE
+function S = OptimizeHypes(S) % optimize hyperparameters based on MLE
 
     nSample = size(S.add.domain,2);   % # of the Samples 
     if size(S.Hypopt.initheta) ~= S.prob.dim
@@ -59,7 +59,7 @@ function [S] = OptimizeHypes(S) % optimize hyperparameters based on MLE
         Xi = ones(nSample,1);
 
         S.Hypopt.alpha = (Xi'*S.Hypopt.invR*S.add.domainy)/(Xi'*S.Hypopt.invR*Xi);
-        S.Hypopt.sigma = 1/nSample*(S.add.domainy-S.Hypopt.alpha*Xi)'*inv_R*(S.add.domainy-S.Hypopt.alpha*Xi);  
+        S.Hypopt.sigma = 1/nSample*(S.add.domainy-S.Hypopt.alpha*Xi)'*S.Hypopt.invR*(S.add.domainy-S.Hypopt.alpha*Xi);  
 
         % MLE
         MLE_result = -0.5*(nSample*log(S.Hypopt.sigma) + log(det(C_xx))); 
