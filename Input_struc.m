@@ -17,8 +17,8 @@ S.prob.numinitsam = 10;                                                         
 %% Hyperparameter optimization
 
 % Variable
-S.Hypopt.solver = 'fmincon';                                                                              % Maximum likelihood estimation solver ( 'ga', 'pso', 'fmincon' )
-S.Hypopt.frequency = 5;                                                                                   % How often to calculate hyperparameters (%% Orginally, "divider" %%)
+S.Hypopt.solver = 'fmincon';                                                                              % Maximum likelihood estimation solver ('fmincon','fminunc','ga','pso')
+S.Hypopt.frequency = 5;                                                                                   % How often to calculate hyperparameters
 S.Hypopt.initheta = zeros(1,S.prob.dim);                                                                  % Initial theta (guess)
 
 % Use Default
@@ -32,8 +32,8 @@ S.Hypopt.sigma = 0;                                                             
 %% Acquisition function
 
 % Variable
-S.acqui.mode = 'EI';                                                                                      % Acquisition function for bayesian optimization ( 'EI', 'PI', 'UCB', 'LCB' )
-S.acqui.solver = 'ga+fmincon';                                                                            % Solver for the acquisition function ('ga','pso','fmincon','ga+fmincon','multi_start')
+S.acqui.mode = 'EI';                                                                                      % Acquisition function for bayesian optimization ('PI', 'EI', 'LCB', 'UCB', 'MP', 'EIMP')
+S.acqui.solver = 'ga+fmincon';                                                                            % Solver for the acquisition function ('fmincon','ga','ga+fmincon','pso','multi_start')
 S.acqui.mindis = 0.01;                                                                                    % Minimum distance between samples
 
 % Use Default

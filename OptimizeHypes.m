@@ -31,7 +31,7 @@ function S = OptimizeHypes(S) % Optimize hyperparameters based on MLE
                 options = optimoptions('ga','PopulationSize',300,'UseParallel',true);
                 S.Hypopt.theta = ga(@(x) -MLE(x), length(S.Hypopt.initheta),[],[],[],[],ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,[],[],options);
 
-            case 'particleswarm'
+            case 'pso'
                 options = optimoptions('particleswarm','SwarmSize',200,'UseParallel',true);
                 S.Hypopt.theta = particleswarm(@(x) -MLE(x), length(S.Hypopt.initheta),ones(size(S.add.domain,1),1)*0,ones(size(S.add.domain,1),1)*100,options);
             otherwise
