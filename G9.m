@@ -1,10 +1,9 @@
 %% 0.Setting for Matlab
 
 clear; clc;
-format("shortG")
 rng("shuffle")
-delete(gcp('nocreate'))        % returns the current pool if one exists, otherwise pool will be empty & delete it
-parpool('threads')             % creates and returns a thread-based pool.
+delete(gcp('nocreate'))
+parpool('threads')             
 
 %% 1.Setting for Bayesopt
 
@@ -12,10 +11,10 @@ parpool('threads')             % creates and returns a thread-based pool.
 
 %% 2.Iteration for Bayesopt
 
-while S.add.cnt < S.prob.maxiter       % until to be maximum iterations
+while S.add.cnt < S.prob.maxiter
     tic
 
-    % Hyperparameter optimization with new samples based on MLE (maximum likelyhood estimation)
+    % Hyperparameter optimization based on MLE
     S = OptimizeHypes(S);
 
     % Acquisition function for the new point
@@ -25,13 +24,13 @@ while S.add.cnt < S.prob.maxiter       % until to be maximum iterations
     S = Add_point(S);
 
     % Print
-    S.add.cnt
-    S.add.minimum_Value(end,1:2)
+    fprintf('\n Iteration : %g',S.add.cnt);
+    fprintf('\n Current minimum value : %g (%g)\n\n',S.add.minimum_Value(end,2),S.add.minimum_Value(end,1));
 
     toc
 end
 
 %% 3.Result
 
-disp(['Minimum_Value_x', num2str(S.add.domain(:,S.add.objective==S.add.minimum_Value(end,2))')])
-disp(['Minimum_Value', S.add.minimum_Value(end,2)])
+fprintf('\n Minimum_Value_x : %s',num2str(S.add.domain(:,S.add.objective==S.add.minimum_Value(end,2))'));
+fprintf('\n Minimum_Value : %g\n\n',S.add.minimum_Value(end,2));

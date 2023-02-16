@@ -20,7 +20,6 @@ pred_mean = S.Hypopt.alpha + r_r'*S.Hypopt.invR*(S.add.domainy-S.Hypopt.alpha);
 
 switch S.acqui.mode
     case "PI"
-        % PI evaulation
         mu = r_r'*S.Hypopt.invR*a - 1;
         pred_sig = S.Hypopt.sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
 
@@ -44,9 +43,9 @@ switch S.acqui.mode
         end
 
     case "EI"
-        % EI evaulation
         mu = r_r'*S.Hypopt.invR*a - 1;
         pred_sig = S.Hypopt.sigma*(1 - r_r'*S.Hypopt.invR*r_r + mu'*(a'*S.Hypopt.invR*a)\mu);
+        
         u = (S.acqui.minobj - pred_mean);
         ss = sqrt(pred_sig);
 
@@ -63,7 +62,6 @@ switch S.acqui.mode
     case "UCB"
 
     case "MP"
-        % MP evaulation
         const_group = [g1,g2,g3,g4]; % Group the constraints from the design varaible
         % Make sure that g value should be minus
         % if design variable violate the given constraints

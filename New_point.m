@@ -15,11 +15,16 @@ while 1
             disp('There is some error, repeat again.')
         end
     end
-    S = Correlation(S);
-    if min(sum(S.Hypopt.r, 3)) > S.acqui.mindis
+    
+    S.Hypopt.r = zeros(size(S.add.domain,2),1,S.prob.dim);
+    for i = 1:S.prob.dim
+        S.Hypopt.r(:,:,i) = S.acqui.x(i)^2 + (S.add.domain(i,:).^ 2)' - 2*S.acqui.x(i)'*S.add.domain(i,:)';
+    end
+
+    if sqrt(min(sum(S.Hypopt.r, 3))) > S.acqui.mindis
         break
     else
-        if abs(S.acqui.exploratio ) >= 5
+        if abs(S.acqui.exploratio) >= 5
             break
         else
             S.acqui.exploratio  = S.acqui.exploratio +1;

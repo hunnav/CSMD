@@ -14,7 +14,7 @@ S.add.constraint(n,1) = max([gg1,gg2,gg3,gg4,0]);
 S = Scaling(S,n);
 
 if (S.add.add(end) == 0 && S.add.objective(end) < S.add.minimum_Value(end,2))
-    S.add.minimum_Value(end+1,:) = [S.add.cnt, S.add.objective(end)];
+    S.add.minimum_Value(end+1,1:2) = [S.add.cnt, S.add.objective(end)];
 end
 
 end

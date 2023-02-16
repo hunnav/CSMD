@@ -15,10 +15,10 @@ if isempty(non_zero_numbers)
     S.add.C = 5;
 else
     S.add.standard(S.add.cnt,3) = median(non_zero_numbers);
-    S.add.C = exp(log(S.add.standard(S.add.cnt,3))/(S.add.domscale /2));
+    S.add.C = exp(log(S.add.standard(S.add.cnt,3))/(S.add.domscale/2));
     S.add.add = log(S.add.constraint+S.add.C)/log(S.add.C)-1;
 end
 S.add.domainy = S.add.Modified_Objective + S.add.add;
-S.add.standard(S.add.cnt,4:7) = [S.add.A,S.add.B,S.add.A,S.add.D];
+S.add.standard(S.add.cnt,4:7) = [S.add.A,S.add.B,S.add.C,S.add.D];
 
 end
