@@ -15,7 +15,7 @@ switch S.acqui.solver
         S.acqui.x = ga(@(x) -Acqfn(x,S), S.prob.dim,[],[],[],[],S.prob.min*ones(1,S.prob.dim),S.prob.max*ones(1,S.prob.dim),[],options)';
 
     case 'pso'
-        options = optimoptions('particleswarm','SwarmSize',200,'UseParallel',true);
+        options = optimoptions('particleswarm','UseParallel',true,'SwarmSize',500,'UseParallel',true,'SelfAdjustmentWeight',2,'SocialAdjustmentWeight',2,'InertiaRange',[0.1,2]);
         S.acqui.x = particleswarm(@(x) -Acqfn(x,S), S.prob.dim,S.prob.min*ones(S.prob.dim,1),S.prob.max*ones(S.prob.dim,1),options)';
 
     case 'multi_start'

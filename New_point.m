@@ -5,7 +5,7 @@ if  S.add.minimum_Value(end,2) == inf
 else
     S.acqui.minobj = S.add.domainy(S.prob.numinitsam + S.add.minimum_Value(end,1));
 end
-
+S.acqui.exploratio = 0;
 while 1
     while 1
         try
@@ -15,10 +15,9 @@ while 1
             disp('There is some error, repeat again.')
         end
     end
-    
     S.Hypopt.r = zeros(size(S.add.domain,2),1,S.prob.dim);
     for i = 1:S.prob.dim
-        S.Hypopt.r(:,:,i) = S.acqui.x(i)^2 + (S.add.domain(i,:).^ 2)' - 2*S.acqui.x(i)'*S.add.domain(i,:)';
+        S.Hypopt.r(:,:,i) = S.acqui.x(i)^2 + (S.add.domain(i,:).^ 2)' - 2*(S.acqui.x(i)'*S.add.domain(i,:))';
     end
 
     if sqrt(min(sum(S.Hypopt.r, 3))) > S.acqui.mindis
