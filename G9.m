@@ -45,9 +45,8 @@ for iter = 1:15
     fprintf('\n Minimum_Value_x : %s',num2str(S.add.domain(:,S.add.objective==S.add.minimum_Value(end,2))'));
     fprintf('\n Minimum_Value : %g\n\n',S.add.minimum_Value(end,2));
 
-    filename = sprintf('Dace_%d.mat', iter);
+    filename = sprintf('Dacea_%d.mat', iter);
     save(filename, '-struct', 'S');
 end
 
-% MP+EI  일단 나중에~
 % bayesian optimization with mixed integer

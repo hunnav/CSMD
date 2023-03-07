@@ -19,3 +19,7 @@ constraint1(:,2) = log((10^(floor(1+log10(abs(object(:,2)))))*max(-constraint1,0
 constraint2(:,2) = log((10^(floor(1+log10(abs(object(:,2)))))*max(-constraint2,0))+C^1)/log(C)-1
 constraint3(:,2) = log((10^(floor(1+log10(abs(object(:,2)))))*max(-constraint3,0))+C^1)/log(C)-1
 constraint4(:,2) = log((10^(floor(1+log10(abs(object(:,2)))))*max(-constraint4,0))+C^1)/log(C)-1
+
+
+% S = struct('add', add, 'acqui', acqui, 'Hypopt',Hypopt,'print',print,'prob',prob)
+% addpoints(animatedline,S.print.x,S.print.y); drawnow;

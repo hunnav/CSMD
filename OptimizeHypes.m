@@ -28,10 +28,14 @@ for i = 1:j
         Value = S.add.constdomainy(:,i-1);
     end
     if or(mod(S.add.cnt,S.Hypopt.frequency)==0,S.add.cnt<100*S.prob.dim)    
-        if and(S.Hypopt.validation == true,S.add.cnt >= S.prob.dim*100)
-            initheta = (S.Hypopt.max-S.Hypopt.min).*lhsdesign(10,S.prob.dim) + (S.Hypopt.min);
+        if S.Hypopt.validation == true
+            initheta = zeros(23,S.prob.dim);
+            initheta(1,:) = zeros(1,S.prob.dim);
+            initheta(2,:) = S.Hypopt.theta(i,:);
+            initheta(3:22,:) = (S.Hypopt.max-S.Hypopt.min).*lhsdesign(20,S.prob.dim) + (S.Hypopt.min);
+            initheta(23,:) = zeros(1,S.prob.dim);
             num_domainy = size(Value,1);
-            training_num = round(num_domainy*S.Hypopt.valratio);
+            training_num = round(num_domainy*S.Hypopt.validation_ratio);
             test_num = num_domainy-training_num;
             except_num = sort(randperm(num_domainy,test_num));
 
@@ -63,7 +67,7 @@ for i = 1:j
         end
 
         while 1
-            if and(S.Hypopt.validation == true,S.add.cnt >= S.prob.dim*100)
+            if S.Hypopt.validation == true
                 k = k+1;
                 S.Hypopt.initheta = initheta(k,:);
             end
@@ -77,23 +81,78 @@ for i = 1:j
                     S.Hypopt.theta(i,:) = fminunc(@(x) -MLE(x), S.Hypopt.initheta,options);
 
                 case 'ga'
-                    options = optimoptions('ga','PopulationSize',300,'UseParallel',true);
-                    S.Hypopt.theta(i,:) = ga(@(x) -MLE(x), length(S.Hypopt.initheta),[],[],[],[],ones(S.prob.dim,1)*S.Hypopt.min,ones(S.prob.dim,1)*S.Hypopt.max,[],[],options);
+                    options = optimoptions('ga','InitialPopulationRange',[S.Hypopt.min;S.Hypopt.max],'PopulationSize',300,'UseParallel',true);
+                    while 1
+                        try
+                            S.Hypopt.theta(i,:) = ga(@(x) -MLE(x), S.prob.dim,[],[],[],[],ones(S.prob.dim,1)*S.Hypopt.min,ones(S.prob.dim,1)*S.Hypopt.max,[],options);
+                            break
+                        catch
+                            disp('There is some error, repeat again.')
+                        end
+                    end
+                   
+                case 'ga+fmincon'
+                    hybridopts = optimoptions('fmincon','Display', 'off', 'algorithm', 'interior-point', 'HessianApproximation','bfgs','FiniteDifferenceType', 'central','OptimalityTolerance',1e-10,'UseParallel',true);
+                    options = optimoptions('ga','InitialPopulationRange',[S.Hypopt.min;S.Hypopt.max],'PopulationSize',300,'UseParallel',true,'HybridFcn',{'fmincon',hybridopts});
+                    while 1
+                        try
+                            S.Hypopt.theta(i,:) = ga(@(x) -MLE(x), S.prob.dim,[],[],[],[],ones(S.prob.dim,1)*S.Hypopt.min,ones(S.prob.dim,1)*S.Hypopt.max,[],options);
+                            break
+                        catch
+                            disp('There is some error, repeat again.')
+                        end
+                    end
 
                 case 'pso'
                     options = optimoptions('particleswarm','SwarmSize',200,'UseParallel',true);
                     S.Hypopt.theta(i,:) = particleswarm(@(x) -MLE(x), S.prob.dim,ones(S.prob.dim,1)*S.Hypopt.min,ones(S.prob.dim,1)*S.Hypopt.max,options);
 
                 case 'dace'
-                    dmodel = dacefit(S.add.domain', S.add.domainy, S.Hypopt.dace_reg, S.Hypopt.dace_cor, S.Hypopt.initheta, (S.Hypopt.min+1e-10)*ones(1,S.prob.dim), S.Hypopt.max*ones(1,S.prob.dim));
-                    S.Hypopt.theta = dmodel.theta;
-                    MLE(S.Hypopt.theta);
+                    if strcmp(S.Hypopt.dace_reg, 'regpolyauto')
+                        if nSample >= (S.prob.dim+1)*(S.prob.dim+2)*(S.prob.dim+3)/6
+                            regmode = 'regpoly3';
+                        elseif nSample >= (S.prob.dim+1)*(S.prob.dim+2)/2
+                            regmode = 'regpoly2';
+                        elseif nSample >= 1+S.prob.dim
+                            regmode = 'regpoly1';
+                        else
+                            regmode = 'regpoly0';
+                        end
+                    else 
+                        regmode = S.Hypopt.dace_reg;
+                    end
+                    if strcmp(S.acqui.mode, 'MP')
+                        if strcmp(S.acqui.mp_constmode, 'same')
+                            dace_domain = S.add.domain;
+                        else
+                            if i == 1
+                                dace_domain = S.add.domain;
+                            else
+                                dace_domain = S.add.domain;
+                                if strcmp(S.acqui.mp_constmode, 'different')
+                                    dace_domain(:,1:S.prob.numinitsam) = S.add.iniconstdomain(:,1:S.prob.numinitsam);
+                                else
+                                    dace_domain(:,1:S.prob.numinitsam) = S.add.iniconstdomain(:,1:S.prob.numinitsam,i-1);
+                                end
+                            end
+                        end
+                    else
+                        dace_domain = S.add.domain;
+                    end
+                    if S.Hypopt.validation == true
+                        idx = true(size(dace_domain));
+                        idx(:,except_num) = false;
+                        dace_domain = reshape(dace_domain(idx), S.prob.dim, training_num);
+                    end
+                    dmodel = dacefit(dace_domain', domainy, regmode, S.Hypopt.dace_cor, S.Hypopt.initheta, (S.Hypopt.min+1e-6)*ones(1,S.prob.dim), S.Hypopt.max*ones(1,S.prob.dim));
+                    S.Hypopt.theta(i,:) = dmodel.theta;
+                    MLE(S.Hypopt.theta(i,:));
 
                 otherwise
                     error("solver type is not specific");
             end
 
-            if and(S.Hypopt.validation == true,S.add.cnt >= S.prob.dim*100)
+            if S.Hypopt.validation == true
                 S.Hypopt.r = zeros(training_num,1,S.prob.dim);
                 result = zeros(test_num,1);
                 for test_sequence = 1:test_num
@@ -114,12 +173,12 @@ for i = 1:j
                     if and(validation_domainy(test_sequence)>=pred_mean-pred_sig*1.96, validation_domainy(test_sequence)<=pred_mean+pred_sig*1.96)
                         result(test_sequence,1) = 0;
                     else
-                        disp("Use new initial theta")
+                        fprintf('Use new initial theta (%g)\n',k);
                         result(test_sequence,1) = 1;
                         break
                     end
                 end
-                if sum(result) == 0
+                if or(sum(result) == 0, k == 23)
                     domainy = Value;
                     R = S.Hypopt.R;
                     nSample = size(S.add.domain,2);

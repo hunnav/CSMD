@@ -13,28 +13,28 @@ S.prob.maxiter = 300;                                                           
 S.prob.min = -10;                                                                                         % Minimum value of design variables
 S.prob.max = 10;                                                                                          % Maximum value of design variables
 S.prob.numinitsam = 10;                                                                                   % # of initial samples    
-S.prob.constmode = 'same';                                                                                % Only for MP, Determine initial constraint domain ('same','different','seperate')
 S.prob.surconst = false;                                                                                  % Using surrogate constraint mode, different with MP (true,false)
 S.prob.numconstraint = 4;                                                                                 % Number of constraints
 
 % Hyperparameter optimization
-S.Hypopt.solver = 'dace';                                                                                 % Maximum likelihood estimation solver ('fmincon','fminunc','ga','pso','dace')
+S.Hypopt.solver = 'dace';                                                                                 % Maximum likelihood estimation solver ('fmincon','fminunc','ga','ga+fmincon','pso','dace')
 S.Hypopt.min = 0;                                                                                         % Minimum value of hyperparameter
 S.Hypopt.max = 10;                                                                                        % Maximum value of hyperparameter
-S.Hypopt.validation = false;                                                                              % Using training-validation mode (true,false)
-S.Hypopt.valratio = 0.9;                                                                                  % Validation ratio (0~1)
-S.Hypopt.frequency = 10;                                                                                  % How often to calculate hyperparameters
+S.Hypopt.validation = true;                                                                               % Using training-validation mode (true,false)
+S.Hypopt.validation_ratio = 0.9;                                                                          % Only for validation mode, Validation ratio (0~1)
+S.Hypopt.frequency = 10;                                                                                  % How often to calculate hyperparameters, only when >= S.prob.dim*100
 S.Hypopt.initheta = zeros(1,S.prob.dim);                                                                  % Initial theta
-S.Hypopt.dace_reg = 'regpoly0';                                                                           % Regression function in dace method
-S.Hypopt.dace_cor = 'correxp';                                                                            % Correlation function in dace method
+S.Hypopt.dace_reg = 'regpoly1';                                                                           % Only for Dace, Regression function in dace method ('regpoly0','regpoly1','regpoly2','regpoly3','regpolyauto') (Mininum # : 1, (1+dim), (dim+1)*(dim+2)/2, (dim+1)*(dim+2)*(dim+3)/6)
+S.Hypopt.dace_cor = 'correxp';                                                                            % Only for Dace, Correlation function in dace method ('corrcubic','correxp','correxpg','corrgauss','corrlin','corrspherical','corrspline')
 
 % Acquisition function
 S.acqui.mode = 'EI';                                                                                      % Acquisition function for bayesian optimization ('PI', 'EI', 'LCB', 'UCB', 'MP', 'MP+EI')
 S.acqui.solver = 'ga+fmincon';                                                                            % Solver for the acquisition function ('fmincon','ga','ga+fmincon','pso','multi_start')
+S.acqui.mp_constmode = 'same';                                                                            % Only for MP, Determine initial constraint domain ('same','different','seperate')
 S.acqui.mindis = 0.01;                                                                                    % Minimum distance between samples
 
 % Add_point
-S.add.domscale = 100;                                                                                     % scale for the domain
+S.add.domscale = 20;                                                                                      % scale for the domain
 S.add.reversescale = true;                                                                                % Using reverse scale mode (true,false)
 
 
@@ -80,7 +80,7 @@ S.add.objective = transpose(S.prob.f(S.add.domain(1,:), S.add.domain(2,:),...   
                                      S.add.domain(5,:), S.add.domain(6,:),...
                                      S.add.domain(7,:)));
 if or(strcmp(S.acqui.mode(1:2),'MP'), S.prob.surconst == true)
-    switch S.prob.constmode
+    switch S.acqui.mp_constmode
         case 'same'
             for i = 1:S.prob.numconstraint
                 S.add.constdomainy(:,i) = transpose(S.prob.(['c', num2str(i)])( ...                       % Domainy of constraint surrogate model
