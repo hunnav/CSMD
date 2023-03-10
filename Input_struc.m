@@ -32,11 +32,11 @@ S.Hypopt.dace_cor = 'correxp';                                                  
 % Acquisition function
 S.acqui.mode = 'EI';                                                                                      % Acquisition function for bayesian optimization ('PI', 'EI', 'LCB', 'UCB', 'MP', 'MP+EI')
 S.acqui.solver = 'ga+fmincon';                                                                            % Solver for the acquisition function ('fmincon','ga','ga+fmincon','pso','multi_start')
-S.acqui.constmode = 'same';                                                                               % Only for surrogate constraint mode, Determine initial constraint domain ('same','different','seperate')
+S.acqui.const_mode = 'same';                                                                              % Only for surrogate constraint mode, Determine initial constraint domain ('same','different','seperate')
 S.acqui.mindis = 0.01;                                                                                    % Minimum distance between samples
 
 % Add_point
-S.add.scaling = 'yeojohnson';                                                                             % Choose the scailing mode ('boxcox', 'yeojohnson', 'log', 'log2')                                                             
+S.add.scaling = 'boxcox';                                                                                 % Choose the scailing mode ('boxcox', 'yeojohnson', 'log', 'log2')                                                             
 S.add.log_domscale = 20;                                                                                  % Only for log and log2, Scale for the domain
 
 
@@ -83,7 +83,7 @@ S.add.objective = transpose(S.prob.f(S.add.domain(1,:), S.add.domain(2,:),...   
                                      S.add.domain(5,:), S.add.domain(6,:),...
                                      S.add.domain(7,:)));
 if S.prob.surconst == true
-    switch S.acqui.constmode
+    switch S.acqui.const_mode
         case 'same'
             for i = 1:S.prob.numconstraint
                 S.add.original_constdomainy(:,i) = transpose(S.prob.(['c', num2str(i)])( ...              % Domainy of constraint surrogate model

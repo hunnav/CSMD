@@ -110,13 +110,13 @@ for i = 1:j
                                 regmode = S.Hypopt.dace_reg;
                             end
                             if S.prob.surconst == true
-                                if strcmp(S.acqui.constmode, 'same')
+                                if strcmp(S.acqui.const_mode, 'same')
                                     dace_domain = S.add.domain;
                                 else
                                     if i == 1
                                         dace_domain = S.add.domain;
                                     else
-                                        if strcmp(S.acqui.constmode, 'different')
+                                        if strcmp(S.acqui.const_mode, 'different')
                                             dace_domain(:,1:S.prob.numinitsam) = S.add.iniconstdomain(:,1:S.prob.numinitsam);
                                         else
                                             dace_domain(:,1:S.prob.numinitsam) = S.add.iniconstdomain(:,1:S.prob.numinitsam,i-1);

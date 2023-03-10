@@ -50,4 +50,5 @@ for iter = 1:10
 
 end
 
+% 분산 처리 어케할지 고민
 % bayesian optimization with mixed integer

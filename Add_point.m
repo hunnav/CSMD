@@ -11,11 +11,13 @@ gg1 = 0-S.prob.c1(S.acqui.x(1),S.acqui.x(2),S.acqui.x(3),S.acqui.x(4),S.acqui.x(
 gg2 = 0-S.prob.c2(S.acqui.x(1),S.acqui.x(2),S.acqui.x(3),S.acqui.x(4),S.acqui.x(5),S.acqui.x(6),S.acqui.x(7));              % we need to change it according to the conditon
 gg3 = 0-S.prob.c3(S.acqui.x(1),S.acqui.x(2),S.acqui.x(3),S.acqui.x(4),S.acqui.x(5),S.acqui.x(6),S.acqui.x(7));              % we need to change it according to the conditon
 gg4 = 0-S.prob.c4(S.acqui.x(1),S.acqui.x(2),S.acqui.x(3),S.acqui.x(4),S.acqui.x(5),S.acqui.x(6),S.acqui.x(7));              % we need to change it according to the conditon
+S.add.constraint(n,1) = p0*max([gg1,gg2,gg3,gg4,0]);                                                                        % we need to change it according to the conditon
 if S.prob.surconst == 1
     S.add.original_constdomainy(n,:) = [gg1,gg2,gg3,gg4];                                                                   % we need to change it according to the conditon
+    S.add.obPLUScon(n,1) = S.add.objective(n,1);
+else
+    S.add.obPLUScon(n,1) = S.add.objective(n,1) + S.add.constraint(n,1);
 end
-S.add.constraint(n,1) = p0*max([gg1,gg2,gg3,gg4,0]);                                                                        % we need to change it according to the conditon
-S.add.obPLUScon(n,1) = S.add.objective(n,1) + S.add.constraint(n,1);
 
 S = Scaling(S,n);
 
