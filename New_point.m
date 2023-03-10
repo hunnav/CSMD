@@ -19,7 +19,6 @@ while 1
     for i = 1:S.prob.dim
         S.Hypopt.r(:,:,i) = S.acqui.x(i)^2 + (S.add.domain(i,:).^ 2)' - 2*(S.acqui.x(i)'*S.add.domain(i,:))';
     end
-
     if sqrt(min(sum(S.Hypopt.r, 3))) > S.acqui.mindis
         break
     else
