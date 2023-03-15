@@ -1,6 +1,6 @@
 function S = New_point(S)
 
-if  S.add.minimum_Value(end,2) == inf
+if S.add.minimum_Value(end,2) == inf
     S.acqui.minobj = min(S.add.domainy);
 else
     S.acqui.minobj = S.add.domainy(S.prob.numinitsam + S.add.minimum_Value(end,1));

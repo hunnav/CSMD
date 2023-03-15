@@ -74,7 +74,7 @@ switch S.acqui.mode
             Result = ((u-p0*S.acqui.exploratio)*normcdf(u/ss) + ss*normpdf(u/ss));   % EI calculation process
             if S.prob.surconst ==1
                 for i = 1:S.prob.numconstraint
-                    Result = Result*normcdf((0-pred_constraint_mean(i))/pred_constraint_sig(i));
+                    Result = Result*normcdf((S.add.surconst_standard(i)-pred_constraint_mean(i))/pred_constraint_sig(i));
                 end
             end
         else

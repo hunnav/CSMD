@@ -1,5 +1,4 @@
 function [S] = Input_struc
-
 %% Variable
 
 % Problem
@@ -11,11 +10,11 @@ S.prob.c3 = @(a,b,c,d,e,f,g) 196-23*a-b.^2-6*f.^2+8*g;                          
 S.prob.c4 = @(a,b,c,d,e,f,g) -4*a.^2-b.^2+3*a.*b-2*c.^2-5*f+11*g;                                         % Constraint4 (plz defrom the equation to be "constraint >=0" form)
 S.prob.dim = 7;                                                                                           % Dimension of the problem
 S.prob.numconstraint = 4;                                                                                 % Number of constraints
-S.prob.maxiter = 300;                                                                                     % Maximum iterations for Bayesopt
+S.prob.maxiter = 500;                                                                                    % Maximum iterations for Bayesopt
 S.prob.min = -10;                                                                                         % Minimum value of design variables
 S.prob.max = 10;                                                                                          % Maximum value of design variables
 S.prob.numinitsam = 10;                                                                                   % # of initial samples    
-S.prob.surconst = false;                                                                                  % Using surrogate constraint mode, different with MP (true,false)
+S.prob.surconst = true;                                                                                   % Using surrogate constraint mode (true,false)
 
 % Hyperparameter optimization
 S.Hypopt.solver = 'dace';                                                                                 % Maximum likelihood estimation solver ('fmincon','fminunc','ga','ga+fmincon','pso','dace')
@@ -33,19 +32,20 @@ S.Hypopt.dace_cor = 'correxp';                                                  
 S.acqui.mode = 'EI';                                                                                      % Acquisition function for bayesian optimization ('PI', 'EI', 'LCB', 'UCB', 'MP', 'MP+EI')
 S.acqui.solver = 'ga+fmincon';                                                                            % Solver for the acquisition function ('fmincon','ga','ga+fmincon','pso','multi_start')
 S.acqui.const_mode = 'same';                                                                              % Only for surrogate constraint mode, Determine initial constraint domain ('same','different','seperate')
-S.acqui.mindis = 0.01;                                                                                    % Minimum distance between samples
+S.acqui.mindis = 0.1;                                                                                     % Minimum distance between samples
 
 % Add_point
-S.add.scaling = 'boxcox';                                                                                 % Choose the scailing mode ('boxcox', 'yeojohnson', 'log', 'log2')                                                             
+S.add.scaling = 'yeojohnson';                                                                             % Choose the scailing mode ('minmax', 'boxcox', 'yeojohnson', 'log', 'log2', 'none')                                                             
+S.add.constscaling = 'minmax';                                                                            % Only for surrogate constraint mode, choose the scailing mode ('minmax', 'boxcox', 'yeojohnson', 'log', 'log2', 'none')                                                             
 S.add.log_domscale = 20;                                                                                  % Only for log and log2, Scale for the domain
 
 
 %% Default
 
 % Problem
-S.prob.filename = sprintf('%s_%d_%s_%d_%s_%s_%s', ...                                                     % File name (Hyperparameter solver_validation_acqui_acqui solver)
+S.prob.filename = sprintf('%s_%d_%s_%d_%s_%s_%s_%s', ...                                                     % File name (Hyperparameter solver_validation_acqui_acqui solver)
     S.prob.f_name,S.prob.maxiter,S.Hypopt.solver,S.Hypopt.validation, ...
-    S.acqui.mode,S.acqui.solver,S.add.scaling);
+    S.acqui.mode,S.acqui.solver,S.add.scaling,S.add.constscaling);
 
 % Hyperparameter optimization
 if S.prob.surconst == true
@@ -112,6 +112,7 @@ if S.prob.surconst == true
             end
     end
     S.add.constdomainy = S.add.original_constdomainy;                                                     % For modified constdomainy
+    S.add.surconst_standard = zeros(1,S.prob.numconstraint);                                              % Only for surrogate constraint mode, standard of constraint                     
 end
 if  S.prob.surconst == true                                                                               % Original value of constraint function
     S.add.constraint = max([S.add.original_constdomainy(:,:), ...
